@@ -36,3 +36,14 @@ def __getBlackPieces():
     pieces.append(Piece("black", 3, 0, "king"))
     pieces.append(Piece("black", 4, 0, "queen"))
     return pieces
+
+
+def getPieceFrom(coordinates: float, piece: str):
+    color = "white"
+    if piece.islower() is True:
+        color = "black"
+    x = coordinates % 8
+    y = coordinates // 8
+    pieceTypes = {'R': 'rook', 'N': 'knight', 'K': 'king', 'Q': 'queen', 'B': 'bishop', 'P': 'pawn'}
+
+    return Piece(color, x, y, pieceTypes[piece.upper()])

@@ -10,3 +10,6 @@ class State:
 
     def getPieceMap(self):
         return self.board.piece_map()
+
+    def getBoard(self):
+        return self.board

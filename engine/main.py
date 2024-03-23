@@ -5,12 +5,13 @@ import chess
 from State import State
 
 pygame.init()
-window = pygame.display.set_mode((800, 800))
+window = pygame.display.set_mode((1000, 1000))
 
 clock = pygame.time.Clock()
 state = State(chess.Board())
-print(state.getPieceMap())
+
 gameBoard = pygame.Surface(window.get_size())
+
 gameBoard.fill((255, 255, 255))
 size = (min(window.get_size()) - 20) // 8
 start = (window.get_width() - size * 8) // 2, (window.get_height() - size * 8) // 2
@@ -22,19 +23,27 @@ for y in range(8):
         color = (192, 192, 164) if (x + y) % 2 == 0 else (96, 64, 32)
         pygame.draw.rect(gameBoard, color, (start[0] + x * size, start[1] + y * size, size, size))
 
-
 # Get initial board setup
 group = pygame.sprite.Group()
-figures = EngineUtils.getInitialPieces()
+# figures = EngineUtils.getInitialPieces()
+
+pieceMap = state.getPieceMap()
+figures = []
+for val, key in enumerate(pieceMap):
+    figures.append(EngineUtils.getPieceFrom(key, str(pieceMap.get(key))))
+
 for i, figure in enumerate(figures):
     group.add(PieceSprite(board_rect, figure.x, figure.y, figure.draw()))
 
-#TODO: Board needs to get pulled from State
-#TODO: Black always wins on takes, needs to be adjusted
-#TODO: Board needs to be aware of moves
-#TODO: Moves need to follow rules set by State
+# TODO: Board needs to get pulled from State
+# TODO: Board actions need to affect State
+# TODO: Board needs to be aware of moves
+# TODO: Moves need to follow rules set by State
+board = state.getBoard()
+
+
 run = True
-while True:
+while run:
     clock.tick(60)
     event = pygame.event.wait()
     event_list = [event]
@@ -49,7 +58,6 @@ while True:
     window.blit(gameBoard, (0, 0))
     group.draw(window)
     pygame.display.flip()
-
 
 pygame.quit()
 exit()
