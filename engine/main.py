@@ -23,8 +23,7 @@ for y in range(8):
 # Fill up the state with the board engine and visual
 state = State(chess.Board(), pygame.sprite.Group(), board_rect, window, gameBoard)
 
-# TODO: Board needs to refresh from state after move
-# state.drawGroup()
+
 run = True
 counter = 0
 while run:
@@ -39,7 +38,6 @@ while run:
 
     state.updateEvent(event)
     state.drawGroup()
-
     pygame.display.flip()
 
 

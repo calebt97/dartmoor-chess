@@ -15,39 +15,38 @@ class State:
         self.toSquare = None
         self.window = window
 
-    def display(self):
-        print(self.board)
-
-    def getPieceMap(self):
-        return self.board.piece_map()
-
-    def getBoard(self):
-        return self.board
-
     def updateEvent(self, event):
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        isSecondMove = self.fromSquare is not None
+
+        if event.type == pygame.MOUSEBUTTONDOWN and isSecondMove is False:
             self.fromSquare = EngineUtils.getMoveFromPos(event.dict['pos'])
 
-        if event.type == pygame.MOUSEBUTTONUP:
+        elif isSecondMove is True and event.type == pygame.MOUSEBUTTONDOWN:
+            print("Called")
+            print(self.fromSquare)
             self.toSquare = EngineUtils.getMoveFromPos(event.dict['pos'])
 
-            ##Construct a move once we have picked up the piece and dropped it
+            # Construct a move once we have picked up the piece and dropped it
             move = chess.Move(from_square=self.fromSquare, to_square=self.toSquare)
 
+            # If legal, make move
             if self.board.is_legal(move):
                 self.board.push(move)
                 self.drawGroup()
 
-        self.window.blit(self.gameBoardVis, (0, 0))
-        self.group.update([event])
+            # Regardless, clear out move set
+            self.fromSquare = None
+            self.toSquare = None
 
-    def getGroup(self):
-        return self.group
+        self.group.update([event])
+        self.window.blit(self.gameBoardVis, (0, 0))
 
     def drawGroup(self):
+
         piece_map = self.board.piece_map()
         figures = []
+
         self.group = pygame.sprite.Group()
 
         for val, key in enumerate(piece_map):
