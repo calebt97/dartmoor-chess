@@ -5,7 +5,9 @@ from PieceSprite import PieceSprite
 
 class State:
 
-    def __init__(self, board: chess.Board, group: pygame.sprite.Group, board_rect: pygame.rect.Rect, window: pygame.display):
+    def __init__(self, board: chess.Board, group: pygame.sprite.Group, board_rect: pygame.rect.Rect,
+                 window: pygame.display, board_viz: pygame.Surface):
+        self.gameBoardVis = board_viz
         self.board = board
         self.group = group
         self.board_rect = board_rect
@@ -22,9 +24,6 @@ class State:
     def getBoard(self):
         return self.board
 
-    def updateBoard(self, event):
-        print("something")
-
     def updateEvent(self, event):
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -40,29 +39,21 @@ class State:
                 self.board.push(move)
                 self.drawGroup()
 
+        self.window.blit(self.gameBoardVis, (0, 0))
         self.group.update([event])
-
 
     def getGroup(self):
         return self.group
 
     def drawGroup(self):
-        pieceMap = self.board.piece_map()
+        piece_map = self.board.piece_map()
         figures = []
+        self.group = pygame.sprite.Group()
 
-        for val, key in enumerate(pieceMap):
-            figures.append(EngineUtils.getPieceFrom(key, str(pieceMap.get(key))))
+        for val, key in enumerate(piece_map):
+            figures.append(EngineUtils.getPieceFrom(key, str(piece_map.get(key))))
 
         for i, figure in enumerate(figures):
             self.group.add(PieceSprite(self.board_rect, figure.x, figure.y, figure.draw()))
 
         return self.group.draw(self.window)
-
-    def setupBoard(self):
-        pieceMap = self.board.piece_map()
-        figures = []
-        for val, key in enumerate(pieceMap):
-            figures.append(EngineUtils.getPieceFrom(key, str(pieceMap.get(key))))
-
-        for i, figure in enumerate(figures):
-            self.group.add(PieceSprite(self.board_rect, figure.x, figure.y, figure.draw()))

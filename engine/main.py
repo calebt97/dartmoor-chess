@@ -1,6 +1,3 @@
-import sys
-import time
-
 import pygame, chess
 
 from State import State
@@ -24,11 +21,10 @@ for y in range(8):
         pygame.draw.rect(gameBoard, color, (start[0] + x * size, start[1] + y * size, size, size))
 
 # Fill up the state with the board engine and visual
-state = State(chess.Board(), pygame.sprite.Group(), board_rect, window)
+state = State(chess.Board(), pygame.sprite.Group(), board_rect, window, gameBoard)
 
-# TODO: Board actions need to affect State
-# TODO: Board needs to be aware of moves
-
+# TODO: Board needs to refresh from state after move
+# state.drawGroup()
 run = True
 counter = 0
 while run:
@@ -37,16 +33,15 @@ while run:
     pygame.event.set_allowed(allowedActions)
 
     event = pygame.event.wait()
-    print(event)
 
     if event.type == pygame.QUIT:
         run = False
 
     state.updateEvent(event)
-    #
-    window.blit(gameBoard, (0, 0))
     state.drawGroup()
+
     pygame.display.flip()
+
 
 pygame.quit()
 exit()
