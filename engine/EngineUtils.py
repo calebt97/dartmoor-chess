@@ -1,4 +1,8 @@
+import chess
+
 from Piece import Piece
+
+pieceTypes = {'R': 'rook', 'N': 'knight', 'K': 'king', 'Q': 'queen', 'B': 'bishop', 'P': 'pawn'}
 
 
 def getInitialPieces():
@@ -38,12 +42,22 @@ def __getBlackPieces():
     return pieces
 
 
+
 def getPieceFrom(coordinates: float, piece: str):
     color = "white"
     if piece.islower() is True:
         color = "black"
     x = coordinates % 8
     y = coordinates // 8
-    pieceTypes = {'R': 'rook', 'N': 'knight', 'K': 'king', 'Q': 'queen', 'B': 'bishop', 'P': 'pawn'}
 
     return Piece(color, x, y, pieceTypes[piece.upper()])
+
+##TODO: Not perfectly precise but good enough and I'm tired of playing with pixels
+def getMoveFromPos(pos: tuple):
+    xRaw = pos[0]
+    x = (xRaw // 122)
+
+    yRaw = pos[1]
+    y = ((yRaw // 122) - 7) * -1
+
+    return chess.square(x,y)

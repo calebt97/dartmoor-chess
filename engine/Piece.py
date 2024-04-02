@@ -9,4 +9,3 @@ class Piece:
 
     def draw(self):
         return pygame.image.load(f"pieces-basic-png/{self.color}-{self.type}.png")
-        # surface.blit(img, (self.x*108, self.y*108))
