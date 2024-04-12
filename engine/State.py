@@ -20,7 +20,7 @@ class State:
         self.parser = Parser.Parser()
 
     def updateComputerMove(self, event):
-        move = self.parser.move(self.board)
+        move = self.parser.find_move(self.board)
 
         # If legal, make move
         if self.board.is_legal(move):
@@ -59,6 +59,10 @@ class State:
 
         self.group.update([event])
         self.window.blit(self.gameBoardVis, (0, 0))
+
+        if self.board.is_checkmate():
+            print("Checkmate!")
+            exit(0)
 
     def drawGroup(self):
 
