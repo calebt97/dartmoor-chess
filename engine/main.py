@@ -23,23 +23,24 @@ for y in range(8):
 # Fill up the state with the board engine and visual
 state = State(chess.Board(), pygame.sprite.Group(), board_rect, window, gameBoard)
 
-
 run = True
 counter = 0
 while run:
-    pygame.event.set_blocked(pygame.MOUSEMOTION)
+    blockedActions = [pygame.MOUSEMOTION, pygame.ACTIVEEVENT, pygame.WINDOWEXPOSED, pygame.WINDOWFOCUSGAINED,
+                      pygame.WINDOWFOCUSLOST]
+
+    pygame.event.set_blocked(blockedActions)
+
     allowedActions = [pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]
     pygame.event.set_allowed(allowedActions)
-
     event = pygame.event.wait()
 
     if event.type == pygame.QUIT:
         run = False
 
-    state.updateEvent(event)
+    state.updateHumanMove(event)
     state.drawGroup()
     pygame.display.flip()
-
 
 pygame.quit()
 exit()

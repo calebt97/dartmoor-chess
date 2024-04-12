@@ -1,3 +1,5 @@
 venv/
 .idea/
 engine/__pycache__
+dartmoor_parser/__pycache__
+dartmoor_model/__pycache__
