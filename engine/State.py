@@ -1,6 +1,9 @@
-import chess, pygame, EngineUtils
+import sys, chess, pygame, EngineUtils
+
+sys.path.insert(0, '../')
 
 from PieceSprite import PieceSprite
+from dartmoor_parser import Parser
 
 
 class State:
@@ -14,26 +17,41 @@ class State:
         self.fromSquare = None
         self.toSquare = None
         self.window = window
+        self.parser = Parser.Parser()
 
-    def updateEvent(self, event):
+    def updateComputerMove(self, event):
+        move = self.parser.move(self.board)
 
-        isSecondMove = self.fromSquare is not None
+        # If legal, make move
+        if self.board.is_legal(move):
+            self.board.push(move)
+            self.drawGroup()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and isSecondMove is False:
+        self.group.update([event])
+        self.window.blit(self.gameBoardVis, (0, 0))
+
+    def updateHumanMove(self, event):
+
+        is_second_move = self.fromSquare is not None
+
+        if event.type == pygame.MOUSEBUTTONDOWN and is_second_move is False:
             self.fromSquare = EngineUtils.getMoveFromPos(event.dict['pos'])
 
-        elif isSecondMove is True and event.type == pygame.MOUSEBUTTONDOWN:
-            print("Called")
-            print(self.fromSquare)
+        elif is_second_move is True and event.type == pygame.MOUSEBUTTONDOWN:
             self.toSquare = EngineUtils.getMoveFromPos(event.dict['pos'])
+            promotion = self.get_promotion()
 
-            # Construct a move once we have picked up the piece and dropped it
-            move = chess.Move(from_square=self.fromSquare, to_square=self.toSquare)
+            # Construct a move including potential promotion
+            move = chess.Move(from_square=self.fromSquare, to_square=self.toSquare, promotion=promotion)
 
             # If legal, make move
             if self.board.is_legal(move):
                 self.board.push(move)
                 self.drawGroup()
+                self.updateComputerMove(event)
+
+            else:
+                print("illegal move!")
 
             # Regardless, clear out move set
             self.fromSquare = None
@@ -56,3 +74,15 @@ class State:
             self.group.add(PieceSprite(self.board_rect, figure.x, figure.y, figure.draw()))
 
         return self.group.draw(self.window)
+
+    def getTurnColor(self):
+        return self.board.turn
+
+    def get_promotion(self):
+        pawns = ["P", "p"]
+
+        if chess.square_rank(self.toSquare) == 7 and self.board.piece_at(self.fromSquare).symbol() in pawns:
+            print("promotion!")
+            return chess.QUEEN
+
+        return None
