@@ -30,10 +30,7 @@ class Model:
         move_quality += self.__takes_piece()
         move_quality += self.__move_back_rank_piece()
         move_quality += self.__evaluate_attacks_against()
-        move_quality += self.__evaluate_attacks()
-
-        # TODO: Incentivize protected checks
-        # TODO: Will put your piece at risk
+        move_quality += self.__space_taken()
 
         return move_quality
 
@@ -41,11 +38,24 @@ class Model:
         self.board = board
         self.turn_color = board.turn
 
-    def __evaluate_attacks_against(self):
-        return 0
+    def __space_taken(self):
+        self.board.push(self.move)
+        spaces_attacked = len(self.board.attacks(self.move.to_square))
+        self.board.pop()
+        return spaces_attacked * .2
 
-    def __evaluate_attacks(self):
-        return 0
+    def __evaluate_attacks_against(self):
+        self.board.push(self.move)
+        spaces_attacked_by = len(self.board.attackers(True, self.move.to_square))
+        is_pinned = self.board.is_pinned(self.turn_color, self.move.to_square)
+        self.board.pop()
+
+        if self.__get_current_piece() == 'q' and spaces_attacked_by > 0:
+            return -15.0
+
+        eval = (spaces_attacked_by * 1) + (is_pinned * 3)
+
+        return eval * -1
 
     def __takes_piece(self):
 
@@ -53,17 +63,30 @@ class Model:
             piece_taken = self.board.piece_at(self.move.to_square).symbol().lower()
             return self.pieceValues[piece_taken] / 200.0
 
-        if self.board.is_zeroing(self.move):
-            return .5
-
         return 0
 
     def __move_back_rank_piece(self):
+        eval = 0
+
+        # Deploy pieces that aren't the king on the back rank
         if chess.square_rank(self.move.from_square) == 7 and chess.square_rank(
                 self.move.to_square) != 7 and self.__get_current_piece() != 'k':
-            return 1.6
+            eval += 1.6
 
-        return 0
+        # If possible, move the king back
+        if chess.square_rank(self.move.from_square) < chess.square_rank(
+                self.move.to_square) and self.__get_current_piece() == 'k':
+            eval += 1.6
+
+        # Avoiding moving king forward if possible
+        elif chess.square_rank(self.move.from_square) < chess.square_rank(
+                self.move.to_square) and self.__get_current_piece() == 'k':
+            eval -= 1.6
+
+        if self.board.is_zeroing(self.move):
+            eval += .5
+
+        return eval
 
     def __evaluate_castling(self):
         quality_eval = 0.0
@@ -74,7 +97,7 @@ class Model:
         self.board.push(self.move)
         # Does this move enable castling?
         if self.board.has_castling_rights(self.turn_color):
-            quality_eval = 1.0
+            quality_eval = 1.6
 
         self.board.pop()
 
