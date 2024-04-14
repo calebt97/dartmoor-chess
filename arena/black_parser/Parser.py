@@ -10,7 +10,7 @@ class Parser:
         self.model = Model.Model()
 
     def get_bot_name(self):
-        return "hk-alpha.0.1"
+        return "rando_tron"
 
     def find_move(self, board: chess.Board):
 
@@ -33,7 +33,7 @@ class Parser:
             print("black ideal move " + str(best_move))
 
             print("black ideal eval value " + str(best_move_value))
-        # listomoves = list(board.legal_moves)
-        # random = randrange(len(listomoves))
+        listomoves = list(board.legal_moves)
+        random = randrange(len(listomoves))
 
-        return best_move
+        return listomoves[random]
