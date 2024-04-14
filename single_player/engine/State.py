@@ -1,5 +1,4 @@
 import sys, chess, pygame, EngineUtils
-import time
 
 sys.path.insert(0, '../')
 
@@ -49,6 +48,11 @@ class State:
             if self.board.is_legal(move):
                 self.board.push(move)
                 self.drawGroup()
+
+                if self.board.is_checkmate():
+                    print("Checkmate!")
+                    exit(0)
+
                 self.updateComputerMove(event)
 
             else:

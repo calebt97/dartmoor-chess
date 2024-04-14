@@ -1,12 +1,14 @@
-import chess, random
+from random import randrange
 
-from dartmoor_model import Model
+import chess
 
+from black_model import Model
 
 class Parser:
 
     def __init__(self):
         self.model = Model.Model()
+
 
     def find_move(self, board: chess.Board):
 
@@ -25,7 +27,9 @@ class Parser:
                 best_move_value = move_eval
                 best_move = potential
 
-        print("ideal move " + str(best_move))
-        print("ideal eval value " + str(best_move_value))
+        print("black ideal move " + str(best_move))
+        print("black ideal eval value " + str(best_move_value))
+        listomoves = list(board.legal_moves)
+        random = randrange(len(listomoves))
 
-        return best_move
+        return listomoves[random]
