@@ -29,3 +29,4 @@ class Parser:
         print("white ideal eval value " + str(best_move_value))
 
         return best_move
+

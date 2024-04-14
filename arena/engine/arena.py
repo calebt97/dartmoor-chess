@@ -29,16 +29,20 @@ run = True
 counter = 0
 color = True
 while run:
+    state.drawGroup()
+    pygame.display.flip()
 
     event = pygame.event.wait()
 
     if event.type == pygame.QUIT:
         run = False
 
-    state.play_game(event, color)
+    state.play_game( color)
     state.drawGroup()
     pygame.display.flip()
     color = not color
+    counter += 1
+    print(counter)
 
 pygame.quit()
 exit()

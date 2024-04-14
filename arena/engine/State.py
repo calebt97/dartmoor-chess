@@ -23,21 +23,7 @@ class State:
         self.white_parser = WhiteParser()
         self.black_parser = BlackParser()
 
-    # def updateComputerMove(self):
-    #
-    #     move = self.white_parser.find_move(self.board)
-    #     self.board.push(move)
-    #     self.drawGroup()
-    #     self.window.blit(self.gameBoardVis, (0, 0))
-    #
-    #     time.sleep(1)
-    #     move = self.black_parser.find_move(self.board)
-    #     self.board.push(move)
-    #     self.drawGroup()
-
-    # self.window.blit(self.gameBoardVis, (0, 0))
-
-    def play_game(self, event, color):
+    def play_game(self, color):
         self.window.blit(self.gameBoardVis, (0, 0))
 
         time.sleep(1)
@@ -45,19 +31,24 @@ class State:
             move = self.white_parser.find_move(self.board)
 
             self.board.push(move)
+
             self.drawGroup()
-            # time.sleep(2)
             self.window.blit(self.gameBoardVis, (0, 0))
 
         if color == chess.BLACK:
-            move = self.black_parser.find_move(self.board)
+            move = self.white_parser.find_move(self.board)
+
             self.board.push(move)
-            # self.group.update([event])
+
             self.drawGroup()
-            print(str(self.gameBoardVis))
             self.window.blit(self.gameBoardVis, (0, 0))
 
         if self.board.is_checkmate():
+            self.drawGroup()
+            # self.window.blit(self.gameBoardVis, (0, 0))
+            pygame.display.flip()
+
+            time.sleep(10)
             print("Checkmate!")
             exit(0)
 
@@ -79,45 +70,4 @@ class State:
     def getTurnColor(self):
         return self.board.turn
 
-    def get_promotion(self):
-        pawns = ["P", "p"]
 
-        if chess.square_rank(self.toSquare) == 7 and self.board.piece_at(self.fromSquare).symbol() in pawns:
-            print("promotion!")
-            return chess.QUEEN
-
-        return None
-
-    # def play_game(self):
-    #
-    #     is_second_move = self.fromSquare is not None
-    #
-    #     if event.type == pygame.MOUSEBUTTONDOWN and is_second_move is False:
-    #         self.fromSquare = EngineUtils.getMoveFromPos(event.dict['pos'])
-    #
-    #     elif is_second_move is True and event.type == pygame.MOUSEBUTTONDOWN:
-    #         self.toSquare = EngineUtils.getMoveFromPos(event.dict['pos'])
-    #         promotion = self.get_promotion()
-    #
-    #         # Construct a move including potential promotion
-    #         move = chess.Move(from_square=self.fromSquare, to_square=self.toSquare, promotion=promotion)
-    #
-    #         # If legal, make move
-    #         if self.board.is_legal(move):
-    #             self.board.push(move)
-    #             self.drawGroup()
-    #             self.updateComputerMove(event)
-    #
-    #         else:
-    #             print("illegal move!")
-    #
-    #         # Regardless, clear out move set
-    #         self.fromSquare = None
-    #         self.toSquare = None
-    #
-    #     self.group.update([event])
-    #     self.window.blit(self.gameBoardVis, (0, 0))
-    #
-    #     if self.board.is_checkmate():
-    #         print("Checkmate!")
-    #         exit(0)
