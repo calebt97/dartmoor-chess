@@ -28,14 +28,15 @@ state = State(chess.Board(), pygame.sprite.Group(), board_rect, window, gameBoar
 run = True
 counter = 0
 color = True
+
 while run:
     state.drawGroup()
     pygame.display.flip()
 
-    event = pygame.event.wait()
+    event = pygame.event.peek()
 
-    if event.type == pygame.QUIT:
-        run = False
+    # if event.type == pygame.QUIT:
+    #     run = False
 
     state.play_game( color)
     state.drawGroup()
