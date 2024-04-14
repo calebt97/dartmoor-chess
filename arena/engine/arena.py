@@ -28,19 +28,50 @@ state = State(chess.Board(), pygame.sprite.Group(), board_rect, window, gameBoar
 run = True
 counter = 0
 color = True
+blackWins = 0
+whiteWins = 0
+draws = 0
+total_games = 0
+while total_games < 100:
+    total_games += 1
+    state.initial_random_moves(3)
 
-while run:
+    while run:
+        state.drawGroup()
+        pygame.display.flip()
+
+        event = pygame.event.peek()
+
+        winner = state.play_game(color)
+        state.drawGroup()
+        pygame.display.flip()
+        color = not color
+        if winner == chess.WHITE:
+            print("white won")
+            whiteWins += 1
+            break
+
+        if winner == chess.BLACK:
+            print("black won")
+            blackWins += 1
+            break
+
+        if state.isDraw():
+            print("draw")
+            draws += 1
+            break
+
+    state.reloadState()
     state.drawGroup()
     pygame.display.flip()
 
-    event = pygame.event.peek()
 
-    state.play_game( color)
-    state.drawGroup()
-    pygame.display.flip()
-    color = not color
-    counter += 1
-    print(counter)
+report_file_name = state.get_matchup_name() + ".txt"
+report = open(report_file_name, "w")
+report.write("\nwhite wins: "+str(whiteWins))
+report.write("\nblack wins: "+str(blackWins))
+report.write("\ndraws: "+str(draws))
+report.close()
 
 pygame.quit()
 exit()

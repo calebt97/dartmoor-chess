@@ -59,7 +59,7 @@ class Model:
 
     def __takes_piece(self):
 
-        if self.board.is_capture(self.move):
+        if self.board.is_capture(self.move) and self.board.piece_at(self.move.to_square):
             piece_taken = self.board.piece_at(self.move.to_square).symbol().lower()
             return self.pieceValues[piece_taken] / 200.0
 

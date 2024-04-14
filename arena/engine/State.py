@@ -1,5 +1,6 @@
 import sys, chess, pygame, EngineUtils
 import time
+from random import randrange
 
 sys.path.insert(0, '../')
 
@@ -26,7 +27,7 @@ class State:
     def play_game(self, color):
         self.window.blit(self.gameBoardVis, (0, 0))
 
-        time.sleep(1)
+        # time.sleep(.01)
         if color == chess.WHITE:
             move = self.white_parser.find_move(self.board)
 
@@ -35,7 +36,6 @@ class State:
             self.drawGroup()
             self.window.blit(self.gameBoardVis, (0, 0))
             if self.board.is_checkmate():
-                print("white won")
                 return chess.WHITE
 
         if color == chess.BLACK:
@@ -43,16 +43,11 @@ class State:
 
             self.board.push(move)
 
-            if self.board.is_checkmate():
-                return chess.BLACK
-
             self.drawGroup()
             self.window.blit(self.gameBoardVis, (0, 0))
 
             if self.board.is_checkmate():
-                print("black won")
                 return chess.BLACK
-
 
     def drawGroup(self):
 
@@ -72,4 +67,22 @@ class State:
     def getTurnColor(self):
         return self.board.turn
 
+    def isDraw(self):
+        return self.board.fullmove_number > 100 or self.board.is_stalemate() or self.board.is_fivefold_repetition()
 
+    def reloadState(self):
+        self.board.reset()
+
+    def get_matchup_name(self):
+        return self.white_parser.get_bot_name() + "_v_" + self.black_parser.get_bot_name()
+
+    def initial_random_moves(self, num_moves):
+        for x in range(num_moves):
+            listomoves_white = list(self.board.legal_moves)
+            random = randrange(len(listomoves_white))
+
+            self.board.push(listomoves_white[random])
+            listomoves_black = list(self.board.legal_moves)
+            random = randrange(len(listomoves_black))
+
+            self.board.push(listomoves_black[random])
