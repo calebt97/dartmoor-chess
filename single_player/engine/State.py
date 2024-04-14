@@ -1,5 +1,4 @@
 import sys, chess, pygame, EngineUtils
-import time
 
 sys.path.insert(0, '../')
 
