@@ -35,9 +35,6 @@ while run:
 
     event = pygame.event.peek()
 
-    # if event.type == pygame.QUIT:
-    #     run = False
-
     state.play_game( color)
     state.drawGroup()
     pygame.display.flip()
@@ -47,20 +44,3 @@ while run:
 
 pygame.quit()
 exit()
-
-# while run:
-#     blockedActions = [pygame.MOUSEMOTION, pygame.ACTIVEEVENT, pygame.WINDOWEXPOSED, pygame.WINDOWFOCUSGAINED,
-#                       pygame.WINDOWFOCUSLOST]
-#
-#     pygame.event.set_blocked(blockedActions)
-#
-#     allowedActions = [pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]
-#     pygame.event.set_allowed(allowedActions)
-#     event = pygame.event.wait()
-#
-#     if event.type == pygame.QUIT:
-#         run = False
-#
-#     state.updateHumanMove(event)
-#     state.drawGroup()
-#     pygame.display.flip()

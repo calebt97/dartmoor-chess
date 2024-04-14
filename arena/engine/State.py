@@ -34,23 +34,25 @@ class State:
 
             self.drawGroup()
             self.window.blit(self.gameBoardVis, (0, 0))
+            if self.board.is_checkmate():
+                print("white won")
+                return chess.WHITE
 
         if color == chess.BLACK:
-            move = self.white_parser.find_move(self.board)
+            move = self.black_parser.find_move(self.board)
 
             self.board.push(move)
+
+            if self.board.is_checkmate():
+                return chess.BLACK
 
             self.drawGroup()
             self.window.blit(self.gameBoardVis, (0, 0))
 
-        if self.board.is_checkmate():
-            self.drawGroup()
-            # self.window.blit(self.gameBoardVis, (0, 0))
-            pygame.display.flip()
+            if self.board.is_checkmate():
+                print("black won")
+                return chess.BLACK
 
-            time.sleep(10)
-            print("Checkmate!")
-            exit(0)
 
     def drawGroup(self):
 
