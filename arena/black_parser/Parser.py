@@ -3,7 +3,6 @@ from random import randrange
 import chess
 
 from black_model import Model
-# actually hk-alpha.0.1
 class Parser:
 
     def __init__(self):
@@ -33,6 +32,8 @@ class Parser:
             print("black ideal move " + str(best_move))
 
             print("black ideal eval value " + str(best_move_value))
+        # Randotron if you want it for testing
+        
         # listomoves = list(board.legal_moves)
         # random = randrange(len(listomoves))
 

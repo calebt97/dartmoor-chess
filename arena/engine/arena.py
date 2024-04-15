@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 
 import pygame, chess
 
@@ -32,15 +33,20 @@ blackWins = 0
 whiteWins = 0
 draws = 0
 total_games = 0
-while total_games < 100:
+while total_games < 500:
     total_games += 1
-    state.initial_random_moves(3)
+    state.initial_random_moves(2)
 
     while run:
         state.drawGroup()
         pygame.display.flip()
 
         event = pygame.event.peek()
+
+        if state.isDraw():
+            print("draw")
+            draws += 1
+            break
 
         winner = state.play_game(color)
         state.drawGroup()
@@ -56,21 +62,17 @@ while total_games < 100:
             blackWins += 1
             break
 
-        if state.isDraw():
-            print("draw")
-            draws += 1
-            break
 
     state.reloadState()
     state.drawGroup()
     pygame.display.flip()
 
-
-report_file_name = state.get_matchup_name() + ".txt"
-report = open(report_file_name, "w")
-report.write("\nwhite wins: "+str(whiteWins))
-report.write("\nblack wins: "+str(blackWins))
-report.write("\ndraws: "+str(draws))
+report_file_name = "results/" + state.get_matchup_name() + ".txt"
+path = Path(report_file_name)
+report = open(path, "a")
+report.write("\n------------\nwhite wins: " + str(whiteWins))
+report.write("\nblack wins: " + str(blackWins))
+report.write("\ndraws: " + str(draws))
 report.close()
 
 pygame.quit()

@@ -1,0 +1,28 @@
+
+white wins: 165
+black wins: 4
+draws: 131
+------------
+white wins: 165
+black wins: 8
+draws: 127
+------------
+white wins: 89
+black wins: 15
+draws: 46
+------------
+white wins: 116
+black wins: 9
+draws: 25
+------------
+white wins: 77
+black wins: 4
+draws: 69
+------------
+white wins: 117
+black wins: 5
+draws: 28
+------------
+white wins: 365
+black wins: 28
+draws: 107
