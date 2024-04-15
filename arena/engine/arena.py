@@ -33,9 +33,9 @@ blackWins = 0
 whiteWins = 0
 draws = 0
 total_games = 0
-while total_games < 250:
+while total_games < 500:
     total_games += 1
-    state.initial_random_moves(3)
+    state.initial_random_moves(2)
 
     while run:
         state.drawGroup()
@@ -69,8 +69,8 @@ while total_games < 250:
 
 report_file_name = "results/" + state.get_matchup_name() + ".txt"
 path = Path(report_file_name)
-report = open(path, "w")
-report.write("\nwhite wins: " + str(whiteWins))
+report = open(path, "a")
+report.write("\n------------\nwhite wins: " + str(whiteWins))
 report.write("\nblack wins: " + str(blackWins))
 report.write("\ndraws: " + str(draws))
 report.close()

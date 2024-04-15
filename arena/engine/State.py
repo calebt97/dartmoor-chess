@@ -27,7 +27,7 @@ class State:
     def play_game(self, color):
         self.window.blit(self.gameBoardVis, (0, 0))
 
-        # time.sleep(.01)
+        # time.sleep(.5)
         if color == chess.WHITE:
             move = self.white_parser.find_move(self.board)
 

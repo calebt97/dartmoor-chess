@@ -9,7 +9,7 @@ class Parser:
         self.model = Model.Model()
 
     def get_bot_name(self):
-        return "hk-alpha.0.1"
+        return "hk-alpha.0.2"
 
     def find_move(self, board: chess.Board):
 
