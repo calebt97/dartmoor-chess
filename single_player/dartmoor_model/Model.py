@@ -13,7 +13,7 @@ class Model:
             "k": 200
         }
 
-    # Each eval function pushes move, evaluates then pops move and returns value
+        # Each eval function pushes move, evaluates then pops move and returns value
 
     def evaluateMove(self, move: chess.Move):
         self.move = move
@@ -25,12 +25,22 @@ class Model:
         if move_quality >= 100.0:
             return 100.0
 
+        if self.__get_current_piece() == 'k':
+            move_quality -= 10
+
+        if self.__get_current_piece() == 'r':
+            move_quality -= 5
+
+        if self.__get_current_piece() == 'p':
+            move_quality += 1.2
+
         move_quality += self.__evaluate_castling()
         move_quality += self.__takes_piece()
         move_quality += self.__move_back_rank_piece()
         move_quality += self.__evaluate_attacks_against()
         move_quality += self.__space_taken()
         move_quality += self.__evaluate_attackers_against_current_position()
+        move_quality += self.__avoid_repitition()
 
         return move_quality
 
@@ -43,21 +53,22 @@ class Model:
         self.board.push(self.move)
         spaces_attacked = len(self.board.attacks(self.move.to_square))
 
-        if current_piece == 'q':
-            # It gets queen happy if it overvalues the space a queen takes
-            spaces_attacked = spaces_attacked // 5
+        # if current_piece == 'q':
+        #     # It gets queen happy if it overvalues the space a queen takes
+        #     spaces_attacked = spaces_attacked // 2
 
         self.board.pop()
-        return spaces_attacked * .05
+        return spaces_attacked * .04
 
     def __evaluate_attackers_against_current_position(self):
         if self.__get_current_piece() != 'p':
-            return 8 * len(self.board.attackers(not self.turn_color, self.move.from_square))
+            return 12 * len(self.board.attackers(not self.turn_color, self.move.from_square))
         return 0
 
     def __evaluate_attacks_against(self):
 
         current_piece = self.__get_current_piece()
+        eval = 0
         self.board.push(self.move)
         spaces_attacked_by = len(self.board.attackers(not self.turn_color, self.move.to_square))
         is_pinned = self.board.is_pinned(self.turn_color, self.move.to_square)
@@ -66,7 +77,13 @@ class Model:
         if current_piece == 'q' and spaces_attacked_by > 0:
             return -15.0
 
-        eval = (spaces_attacked_by * 1) + (is_pinned * 3)
+        for attacker in self.board.attackers(not self.turn_color, self.move.to_square):
+            piece = self.board.piece_at(attacker).symbol().lower()
+            if self.pieceValues[piece] < self.pieceValues[current_piece]:
+                eval += 6
+
+
+        eval += is_pinned * 3
 
         return eval * -1
 
@@ -91,19 +108,16 @@ class Model:
 
         # Deploy pieces that aren't the king on the back rank
         if chess.square_rank(self.move.from_square) == self.__get_back_rank() and chess.square_rank(
-                self.move.to_square) != self.__get_back_rank() and self.__get_current_piece() != 'k':
-            eval += 1.6
+                self.move.to_square) != self.__get_back_rank() and self.__get_current_piece() not in ['k','r']:
+            eval += 3.6
 
         # If possible, move the king back
         if self.__is_headed_towards_back_rank() and self.__get_current_piece() == 'k':
-            eval += 1.6
+            eval += 6.6
 
         # Avoiding moving king forward if possible
-        elif not self.__is_headed_towards_back_rank() and self.__get_current_piece() == 'k':
-            eval -= 1.6
-
-        if self.board.is_zeroing(self.move):
-            eval += .6
+        elif not self.__is_headed_towards_back_rank() and self.__get_current_piece() in ['k']:
+            eval -= 6.6
 
         return eval
 
@@ -111,12 +125,12 @@ class Model:
         quality_eval = 0.0
         # Is this move a castle?
         if self.board.is_castling(self.move):
-            quality_eval = 5
+            quality_eval = 25
 
         self.board.push(self.move)
         # Does this move enable castling?
         if self.board.has_castling_rights(self.turn_color):
-            quality_eval = 2.2
+            quality_eval = 5.2
 
         self.board.pop()
 
@@ -141,10 +155,19 @@ class Model:
         square_set = list(self.board.attacks(self.move.to_square))
         for square in square_set:
             if self.board.piece_at(square) is not None:
-                if self.board.piece_at(square).symbol().lower() != 'p':
+                piece = self.board.piece_at(square).symbol().lower()
+                if piece != 'p' and self.pieceValues[piece] >= self.pieceValues[self.__get_current_piece()]:
                     squares_attacked += 1
 
         return squares_attacked * 9
+
+    def __avoid_repitition(self):
+        self.board.push(self.move)
+        if self.board.is_fivefold_repetition():
+            self.board.pop()
+            return -10
+        self.board.pop()
+        return 0
 
     def __get_current_piece(self):
         return self.board.piece_at(self.move.from_square).symbol().lower()
