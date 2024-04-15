@@ -8,4 +8,4 @@ class Piece:
         self.type = piece_type
 
     def draw(self):
-        return pygame.image.load(f"pieces-basic-png/{self.color}-{self.type}.png")
+        return pygame.image.load(f"../pieces-basic-png/{self.color}-{self.type}.png")

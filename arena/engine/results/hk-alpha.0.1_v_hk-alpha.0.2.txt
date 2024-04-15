@@ -1,0 +1,4 @@
+------------
+white wins: 2
+black wins: 35
+draws: 13
