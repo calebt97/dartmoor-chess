@@ -1,3 +1,5 @@
+from random import randrange
+
 import chess
 
 
@@ -14,6 +16,10 @@ class Model:
         }
 
         # Each eval function pushes move, evaluates then pops move and returns value
+
+    def eval_board(self, board: chess.Board):
+
+        return randrange(-9, 9)
 
     def evaluateMove(self, move: chess.Move):
         self.move = move
@@ -82,7 +88,6 @@ class Model:
             if self.pieceValues[piece] < self.pieceValues[current_piece]:
                 eval += 6
 
-
         eval += is_pinned * 3
 
         return eval * -1
@@ -108,7 +113,7 @@ class Model:
 
         # Deploy pieces that aren't the king on the back rank
         if chess.square_rank(self.move.from_square) == self.__get_back_rank() and chess.square_rank(
-                self.move.to_square) != self.__get_back_rank() and self.__get_current_piece() not in ['k','r']:
+                self.move.to_square) != self.__get_back_rank() and self.__get_current_piece() not in ['k', 'r']:
             eval += 3.6
 
         # If possible, move the king back
