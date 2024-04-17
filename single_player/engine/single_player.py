@@ -21,7 +21,9 @@ for y in range(8):
         pygame.draw.rect(gameBoard, color, (start[0] + x * size, start[1] + y * size, size, size))
 
 # Fill up the state with the board engine and visual
-state = State(chess.Board(), pygame.sprite.Group(), board_rect, window, gameBoard)
+board = chess.Board()
+board.set_fen("r7/3qk1b1/2P1p3/1n1p4/3P4/3KP3/2N1B1R1/N7")
+state = State(board, pygame.sprite.Group(), board_rect, window, gameBoard)
 
 run = True
 counter = 0

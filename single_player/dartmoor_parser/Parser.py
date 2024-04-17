@@ -8,6 +8,7 @@ class Parser:
     def __init__(self):
         self.model = Model.Model()
         self.max_depth = 3
+        self.test_list = None
 
     def get_bot_name(self):
         return "hk-alpha.0.3"
@@ -20,8 +21,8 @@ class Parser:
         self.model.loadBoard(board)
 
         moves = self.get_ordered_list_of_moves(board)
+        self.test_list = moves
         return self.get_best_move(board, moves)
-
 
         #
         # best_move_value = -1500.0
@@ -44,17 +45,38 @@ class Parser:
         # return best_move
 
     def get_ordered_list_of_moves(self, board: chess.Board):
-        return board.legal_moves
+        possible_moves = board.legal_moves
+        sorted_moves = sorted(possible_moves, key=lambda move: self.model.evaluateMove(move))
+        sorted_moves.reverse()
+        return sorted_moves
 
     def get_best_move(self, board: chess, moves):
         best_move = None
-        best_value = -10000
+        best_value = 10000
+        print(board.turn)
+
+        if board.turn:
+            best_value *= -1
+
         for move in moves:
-            eval = self.minimax(1, move, board, True, alpha=-10000, beta=10000)
-            if eval > best_value:
+            eval = self.minimax(0, move, board, False, alpha=-10000, beta=10000)
+
+            # White wants the highest eval
+            if board.turn == chess.WHITE and eval > best_value:
                 best_move = move
                 best_value = eval
+                # print("best move update "+str(move))
+                # print("best score update "+str(best_value))
 
+            # Black wants the lowest eval
+            if board.turn == chess.BLACK and eval < best_value:
+                best_move = move
+                best_value = eval
+                # print("best move update "+str(move))
+                # print("best score update "+str(best_value))
+
+        print("best move " + str(best_move))
+        print("best score " + str(best_value))
         return best_move
 
     def minimax(self, depth, move: chess.Move, board: chess.Board, maximizing_player,
@@ -68,42 +90,41 @@ class Parser:
         if board.is_fivefold_repetition():
             return 0
 
-        board.push(move)
         legal_moves = board.legal_moves
 
         # Terminating condition. i.e
         # leaf node is reached
-        if depth == 3:
+        if depth == self.max_depth:
             eval = self.model.eval_board(board)
-            board.pop()
+
             return eval
 
         if maximizing_player:
 
             best = MIN
 
-            # Recur for left and right children
             for move in legal_moves:
+                board_copy = board.copy()
+                board_copy.push(move)
 
-                val = self.minimax(depth + 1, move, board,
+                val = self.minimax(depth + 1, move, board_copy,
                                    False, alpha, beta)
+
                 best = max(best, val)
                 alpha = max(alpha, best)
 
                 # Alpha Beta Pruning
                 if beta <= alpha:
                     break
-            board.pop()
 
             return best
-
 
         else:
             best = MAX
 
-            # Recur for left and
-            # right children
             for move in legal_moves:
+                board_copy = board.copy()
+                board_copy.push(move)
 
                 val = self.minimax(depth + 1, move, board,
                                    True, alpha, beta)
@@ -114,7 +135,6 @@ class Parser:
                 if beta <= alpha:
                     break
 
-            board.pop()
             return best
 
         # def minimax(self, node: chess.Board, depth, isMaximizingPlayer, alpha, beta):

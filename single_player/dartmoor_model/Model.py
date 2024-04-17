@@ -12,14 +12,32 @@ class Model:
             "n": 3.2,
             "b": 3.3,
             "q": 9,
-            "k": 200
+            "k": 0
         }
+        self.count = 0
 
         # Each eval function pushes move, evaluates then pops move and returns value
 
     def eval_board(self, board: chess.Board):
+        score = 0
 
-        return randrange(-9, 9)
+        piece_map = board.piece_map()
+        for key in piece_map:
+            if piece_map[key].symbol().islower():
+                score -= self.pieceValues[piece_map[key].symbol()]
+            else:
+                score += self.pieceValues[piece_map[key].symbol().lower()]
+        #
+        # if board.is_checkmate() and board.turn is False:
+        #     return -10
+        #
+        # if board.is_checkmate() and board.turn:
+        #     return 10
+
+
+        score /= 10
+
+        return score
 
     def evaluateMove(self, move: chess.Move):
         self.move = move
