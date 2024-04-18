@@ -48,18 +48,20 @@ class Parser:
         possible_moves = board.legal_moves
         sorted_moves = sorted(possible_moves, key=lambda move: self.model.evaluateMove(move))
         sorted_moves.reverse()
+
         return sorted_moves
 
     def get_best_move(self, board: chess, moves):
         best_move = None
         best_value = 10000
-        print(board.turn)
 
         if board.turn:
+            # If white, best move should start at -10000
             best_value *= -1
 
         for move in moves:
-            eval = self.minimax(0, move, board, False, alpha=-10000, beta=10000)
+            # move hasn't been made yet, so we need to look at not current board turn
+            eval = self.minimax(0, move, board, not board.turn, alpha=-10000, beta=10000)
 
             # White wants the highest eval
             if board.turn == chess.WHITE and eval > best_value:
