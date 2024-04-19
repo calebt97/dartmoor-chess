@@ -12,12 +12,11 @@ class Parser:
         self.move_model = MoveModel.MoveModel()
         self.max_depth = 2
         self.test_list = None
+        board = chess.Board()
+        self.previous_evals = {board.fen(): 0.0}
 
     def get_bot_name(self):
         return "hk-alpha.0.3"
-
-        # TODO: Sort list of moves by move evaluation
-        # TODO: Traverse tree of moves
 
     def find_move(self, board: chess.Board):
 
@@ -86,7 +85,13 @@ class Parser:
         # Terminating condition. i.e
         # leaf node is reached
         if depth == self.max_depth:
+
+            if self.previous_evals.get(board.fen()) is not None:
+                return self.previous_evals[board.fen()]
+
             eval = self.board_model.eval_board(board)
+
+            self.previous_evals[board.fen()] = eval
 
             return eval
 

@@ -9,12 +9,11 @@ class Parser:
         self.move_model = MoveModel.MoveModel()
         self.max_depth = 2
         self.test_list = None
+        board = chess.Board()
+        self.previous_evals = {board.fen(): 0.0}
 
     def get_bot_name(self):
         return "hk-alpha.0.3"
-
-    # TODO: Sort list of moves by move evaluation
-    # TODO: Traverse tree of moves
 
     def find_move(self, board: chess.Board):
 
@@ -23,7 +22,6 @@ class Parser:
         moves = self.get_ordered_list_of_moves(board)
         self.test_list = moves
         return self.get_best_move(board, moves)
-
 
     def get_ordered_list_of_moves(self, board: chess.Board):
         possible_moves = board.legal_moves
@@ -65,11 +63,16 @@ class Parser:
     def minimax(self, depth, board: chess.Board, maximizing_player,
                 alpha, beta):
 
-        check_mate, MAX, MIN = 10, 1000, -1000
+        MAX, MIN = 1000, -1000
+        white_check_mate, black_checkmate = 1000, -1000
 
-        if board.is_checkmate():
-            # Want it to pick checkmates that are closer in the tree, more mates in 1
-            return check_mate - depth
+        if board.is_checkmate() and board.turn == chess.WHITE:
+            # Bias for checkmates that are fewer turns away
+            return white_check_mate - (depth * 2)
+
+        if board.is_checkmate() and board.turn == chess.BLACK:
+            # Bias for checkmates that are fewer turns away
+            return white_check_mate + (depth * 2)
 
         if board.is_fivefold_repetition():
             return 0
@@ -79,7 +82,13 @@ class Parser:
         # Terminating condition. i.e
         # leaf node is reached
         if depth == self.max_depth:
+
+            if self.previous_evals.get(board.fen()) is not None:
+                return self.previous_evals[board.fen()]
+
             eval = self.board_model.eval_board(board)
+
+            self.previous_evals[board.fen()] = eval
 
             return eval
 
@@ -120,4 +129,3 @@ class Parser:
                     break
 
             return best
-

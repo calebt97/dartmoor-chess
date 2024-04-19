@@ -39,10 +39,9 @@ opening_fens = open("openings/opening_fen_list.txt", "r")
 openings = opening_fens.readlines()
 random.shuffle(openings)
 
-while total_games < 21:
+while total_games < 31:
     total_games += 1
     state.initial_fen(openings[total_games])
-    # state.initial_random_moves(2)
 
     while run:
         state.drawGroup()
