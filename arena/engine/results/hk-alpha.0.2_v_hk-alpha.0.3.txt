@@ -1,0 +1,17 @@
+
+------------
+white wins: 2
+black wins: 2
+draws: 1
+------------
+white wins: 3
+black wins: 3
+draws: 4
+------------
+white wins: 0
+black wins: 6
+draws: 4
+------------
+white wins: 2
+black wins: 4
+draws: 4

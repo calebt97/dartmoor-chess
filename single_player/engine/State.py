@@ -48,6 +48,8 @@ class State:
             if self.board.is_legal(move):
                 self.board.push(move)
                 self.drawGroup()
+                self.group.update([event])
+                self.window.blit(self.gameBoardVis, (0, 0))
 
                 if self.board.is_checkmate():
                     print("Checkmate!")
