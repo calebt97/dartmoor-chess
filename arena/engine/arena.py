@@ -1,3 +1,4 @@
+import random
 import time
 from pathlib import Path
 
@@ -18,6 +19,7 @@ start = (window.get_width() - size * 8) // 2, (window.get_height() - size * 8) /
 board_rect = pygame.Rect(*start, size * 8, size * 8)
 ts, w, h, c1, c2 = 50, *window.get_size(), (128, 128, 128), (64, 64, 64)
 
+
 for y in range(8):
     for x in range(8):
         color = (192, 192, 164) if (x + y) % 2 == 0 else (96, 64, 32)
@@ -33,9 +35,13 @@ blackWins = 0
 whiteWins = 0
 draws = 0
 total_games = 0
-while total_games < 500:
+opening_fens = open("openings/fen_list", "r")
+openings = opening_fens.readlines()
+random.shuffle(openings)
+
+while total_games < 10:
     total_games += 1
-    state.initial_random_moves(2)
+    state.initial_fen(openings[total_games])
 
     while run:
         state.drawGroup()
@@ -46,6 +52,9 @@ while total_games < 500:
         if state.isDraw():
             print("draw")
             draws += 1
+            print("\n------------\nwhite wins: " + str(whiteWins))
+            print("\nblack wins: " + str(blackWins))
+            print("\ndraws: " + str(draws))
             break
 
         winner = state.play_game(color)
@@ -55,11 +64,17 @@ while total_games < 500:
         if winner == chess.WHITE:
             print("white won")
             whiteWins += 1
+            print("\n------------\nwhite wins: " + str(whiteWins))
+            print("\nblack wins: " + str(blackWins))
+            print("\ndraws: " + str(draws))
             break
 
         if winner == chess.BLACK:
             print("black won")
             blackWins += 1
+            print("\n------------\nwhite wins: " + str(whiteWins))
+            print("\nblack wins: " + str(blackWins))
+            print("\ndraws: " + str(draws))
             break
 
 

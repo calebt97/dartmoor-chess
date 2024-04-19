@@ -1,121 +1,213 @@
+from random import randrange
+
 import chess
+import chess.polyglot
+from . import value_maps
 
 
 class Model:
 
     def __init__(self):
         self.pieceValues = {
-            "p": 100,
-            "r": 500,
-            "n": 320,
-            "b": 330,
-            "q": 900,
-            "k": 20000
+            "p": 1,
+            "r": 5,
+            "n": 3.2,
+            "b": 3.3,
+            "q": 9,
+            "k": 0
         }
+        self.count = 0
+        self.opening_reader = chess.polyglot.open_reader("openings/human.bin")
+        self.maps = value_maps.value_maps()
 
-    # Max value is 10.0
-    # Each eval function pushes move, evaluates then pops move and returns value
+    def eval_board(self, board: chess.Board):
+        score = 0
+        if len(board.move_stack) < 10 and self.opening_reader.get(board) is not None:
+            score += self.opening_move(board)
 
-    def evaluateMove(self, move: chess.Move):
-        self.move = move
-        move_quality = 0.0
+        score += self.castling(board)
+        score += self.score_knights(board)
+        score += self.score_pawns(board)
+        score += self.score_queen(board)
+        score += self.score_king(board)
+        score += self.score_rooks(board)
+        score += self.score_bishops(board)
+        score += self.sum_board(board)
 
-        move_quality += self.__evaluate_checks()
+        return score
 
-        # If checkmate just return
-        if move_quality >= 100.0:
-            return 100.0
+    def opening_move(self, board: chess.Board):
+        score = 0
+        if self.opening_reader.get(board) is not None:
+            score = 5 + randrange(-1, 1)
 
-        move_quality += self.__evaluate_castling()
-        move_quality += self.__takes_piece()
-        move_quality += self.__move_back_rank_piece()
-        move_quality += self.__evaluate_attacks_against()
-        move_quality += self.__space_taken()
+        if board.turn == chess.BLACK:
+            return score * -1
 
-        return move_quality
+        return score
 
-    def loadBoard(self, board: chess.Board):
-        self.board = board
-        self.turn_color = board.turn
+    def score_queen(self, board: chess.Board):
+        whiteAttacks = 0
+        whiteAttacked = 0
+        blackAttacks = 0
+        blackAttacked = 0
+        total_white_score = 0
+        total_black_score = 0
 
-    def __space_taken(self):
-        self.board.push(self.move)
-        spaces_attacked = len(self.board.attacks(self.move.to_square))
-        self.board.pop()
-        return spaces_attacked * .2
+        white_queen = board.pieces(chess.QUEEN, chess.WHITE)
+        black_queen = board.pieces(chess.QUEEN, chess.BLACK)
+        for square in white_queen:
+            whiteAttacks += len(board.attacks(square))
+            whiteAttacked += len(board.attackers(chess.BLACK, square))
+            total_white_score += self.maps.queen_table[square] // 22
 
-    def __evaluate_attacks_against(self):
-        self.board.push(self.move)
-        spaces_attacked_by = len(self.board.attackers(True, self.move.to_square))
-        is_pinned = self.board.is_pinned(self.turn_color, self.move.to_square)
-        self.board.pop()
+        for square in black_queen:
+            blackAttacks -= len(board.attacks(square))
+            blackAttacked -= len(board.attackers(chess.BLACK, square))
+            total_black_score -= (-1 * (self.maps.queen_table[square] // 22))
 
-        if self.__get_current_piece() == 'q' and spaces_attacked_by > 0:
-            return -15.0
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
 
-        eval = (spaces_attacked_by * 1) + (is_pinned * 3)
+    def score_king(self, board: chess.Board):
 
-        return eval * -1
+        black_king = board.pieces(chess.KING, chess.BLACK).pop()
+        white_king = board.pieces(chess.KING, chess.WHITE).pop()
 
-    def __takes_piece(self):
+        total_black_score = -1 * self.maps.king_table[black_king] // 10
+        total_white_score = self.maps.king_table[white_king] // 10
+        
+        # if len(board.piece_map()) < 8:
+        #     total_white_score *= -1
+        #     total_black_score *= -1
+        if chess.square_rank(black_king) == 7 and len(board.piece_map()) > 8:
+            total_black_score -= 4
 
-        if self.board.is_capture(self.move) and self.board.piece_at(self.move.to_square):
-            piece_taken = self.board.piece_at(self.move.to_square).symbol().lower()
-            return self.pieceValues[piece_taken] / 200.0
+        if chess.square_rank(white_king) == 0 and len(board.piece_map()) > 8:
+            total_white_score += 4
 
-        return 0
+        return sum([total_white_score, total_black_score])
 
-    def __move_back_rank_piece(self):
-        eval = 0
+    def score_knights(self, board: chess.Board):
+        whiteAttacks = 0
+        whiteAttacked = 0
+        blackAttacks = 0
+        blackAttacked = 0
+        total_white_score = 0
+        total_black_score = 0
 
-        # Deploy pieces that aren't the king on the back rank
-        if chess.square_rank(self.move.from_square) == 7 and chess.square_rank(
-                self.move.to_square) != 7 and self.__get_current_piece() != 'k':
-            eval += 1.6
+        white_knights = board.pieces(chess.KNIGHT, chess.WHITE)
+        black_knights = board.pieces(chess.KNIGHT, chess.BLACK)
+        for square in white_knights:
+            whiteAttacks += len(board.attacks(square))
+            whiteAttacked += len(board.attackers(chess.BLACK, square))
+            total_white_score += self.maps.knight_table[square] // 17
 
-        # If possible, move the king back
-        if chess.square_rank(self.move.from_square) < chess.square_rank(
-                self.move.to_square) and self.__get_current_piece() == 'k':
-            eval += 1.6
+        for square in black_knights:
+            blackAttacks -= len(board.attacks(square))
+            blackAttacked -= len(board.attackers(chess.BLACK, square))
+            total_black_score -= (-1 * (self.maps.knight_table[square] // 17))
 
-        # Avoiding moving king forward if possible
-        elif chess.square_rank(self.move.from_square) < chess.square_rank(
-                self.move.to_square) and self.__get_current_piece() == 'k':
-            eval -= 1.6
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
 
-        if self.board.is_zeroing(self.move):
-            eval += .5
+    def score_rooks(self, board: chess.Board):
+        whiteAttacks = 0
+        whiteAttacked = 0
+        blackAttacks = 0
+        blackAttacked = 0
+        total_white_score = 0
+        total_black_score = 0
 
-        return eval
+        white_rooks = board.pieces(chess.ROOK, chess.WHITE)
+        black_rooks = board.pieces(chess.ROOK, chess.BLACK)
+        for square in white_rooks:
+            whiteAttacks += len(board.attacks(square))
+            whiteAttacked += len(board.attackers(chess.BLACK, square))
+            total_white_score += self.maps.rook_table[square] // 20
 
-    def __evaluate_castling(self):
-        quality_eval = 0.0
-        # Is this move a castle?
-        if self.board.is_castling(self.move):
-            quality_eval = 1.9
+        for square in black_rooks:
+            blackAttacks -= len(board.attacks(square))
+            blackAttacked -= len(board.attackers(chess.BLACK, square))
+            total_black_score -= (-1 * (self.maps.rook_table[square] // 20))
 
-        self.board.push(self.move)
-        # Does this move enable castling?
-        if self.board.has_castling_rights(self.turn_color):
-            quality_eval = 1.6
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
 
-        self.board.pop()
+    def score_bishops(self, board: chess.Board):
+        whiteAttacks = 0
+        whiteAttacked = 0
+        blackAttacks = 0
+        blackAttacked = 0
+        total_white_score = 0
+        total_black_score = 0
 
-        return quality_eval
+        white_bishops = board.pieces(chess.BISHOP, chess.WHITE)
+        black_bishops = board.pieces(chess.BISHOP, chess.BLACK)
+        for square in white_bishops:
+            whiteAttacks += len(board.attacks(square))
+            whiteAttacked += len(board.attackers(chess.BLACK, square))
+            total_white_score += self.maps.bishop_table[square] // 18
 
-    def __evaluate_checks(self):
-        quality_eval = 0
+        for square in black_bishops:
+            blackAttacks -= len(board.attacks(square))
+            blackAttacked -= len(board.attackers(chess.BLACK, square))
+            total_black_score -= (-1 * (self.maps.bishop_table[square] // 18))
 
-        self.board.push(self.move)
-        if self.board.is_check():
-            quality_eval = 1.4
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
 
-        if self.board.is_checkmate():
-            quality_eval = 100.0
+    def score_pawns(self, board: chess.Board):
+        whiteAttacks = 0
+        whiteAttacked = 0
+        blackAttacks = 0
+        blackAttacked = 0
+        total_white_score = 0
+        total_black_score = 0
 
-        self.board.pop()
+        white_pawns = board.pieces(chess.PAWN, chess.WHITE)
+        black_pawns = board.pieces(chess.PAWN, chess.BLACK)
+        for square in white_pawns:
+            whiteAttacks += len(board.attacks(square))
+            whiteAttacked -= len(board.attackers(chess.BLACK, square))
+            total_white_score += self.maps.pawn_table[square] // 18
 
-        return quality_eval
+        for square in black_pawns:
+            blackAttacks -= len(board.attacks(square))
+            blackAttacked += len(board.attackers(chess.BLACK, square))
+            total_black_score -= (-1 * (self.maps.pawn_table[square] // 18))
 
-    def __get_current_piece(self):
-        return self.board.piece_at(self.move.from_square).symbol().lower()
+        # We want attacks to be scarier than attacked for pawns
+        blackAttacked *= .5
+        whiteAttacked *= .5
+
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
+
+    def castling(self, board):
+        score = 0
+
+        if board.has_castling_rights(chess.WHITE):
+            score += 2
+        if board.has_castling_rights(chess.BLACK):
+            score -= 2
+
+        prev_move = board.pop()
+
+        if board.is_castling(prev_move):
+            score = 6
+
+        if board.turn == chess.BLACK:
+            score *= -1
+
+        board.push(prev_move)
+        return score
+
+    #
+    def sum_board(self, board):
+        score = 0
+
+        # score += 9 * (len(board.pieces(chess.QUEEN, chess.WHITE)) - len(board.pieces(chess.QUEEN, chess.BLACK)))
+        # score += 3.3 * (len(board.pieces(chess.BISHOP, chess.WHITE)) - len(board.pieces(chess.BISHOP, chess.BLACK)))
+        # score += 3.2 * (len(board.pieces(chess.KNIGHT, chess.WHITE)) - len(board.pieces(chess.KNIGHT, chess.BLACK)))
+        # score += 5 * (len(board.pieces(chess.ROOK, chess.WHITE)) - len(board.pieces(chess.ROOK, chess.BLACK)))
+        # score += (len(board.pieces(chess.PAWN, chess.WHITE)) - len(board.pieces(chess.PAWN, chess.BLACK)))
+
+        score /= 10
+
+        return score

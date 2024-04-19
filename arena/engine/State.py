@@ -24,10 +24,11 @@ class State:
         self.white_parser = WhiteParser()
         self.black_parser = BlackParser()
 
+
     def play_game(self, color):
         self.window.blit(self.gameBoardVis, (0, 0))
 
-        # time.sleep(.5)
+        time.sleep(.5)
         if color == chess.WHITE:
             move = self.white_parser.find_move(self.board)
 
@@ -68,7 +69,7 @@ class State:
         return self.board.turn
 
     def isDraw(self):
-        return self.board.fullmove_number > 100 or self.board.is_stalemate() or self.board.is_fivefold_repetition()
+        return self.board.outcome() or self.board.fullmove_number > 50
 
     def reloadState(self):
         self.board.reset()
@@ -86,3 +87,5 @@ class State:
             random = randrange(len(listomoves_black))
 
             self.board.push(listomoves_black[random])
+    def initial_fen(self, fen):
+        self.board.set_fen(fen)
