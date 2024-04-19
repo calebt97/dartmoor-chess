@@ -10,7 +10,7 @@ class Model:
     def __init__(self):
         self.pieceValues = {
             "p": 1,
-            "r": 5,
+            "r": 6,
             "n": 3.2,
             "b": 3.3,
             "q": 9,
@@ -22,7 +22,7 @@ class Model:
 
     def eval_board(self, board: chess.Board):
         score = 0
-        if len(board.move_stack) < 10 and self.opening_reader.get(board) is not None:
+        if board.fullmove_number < 12 and self.opening_reader.get(board) is not None:
             score += self.opening_move(board)
 
         score += self.castling(board)
@@ -32,13 +32,14 @@ class Model:
         score += self.score_king(board)
         score += self.score_rooks(board)
         score += self.score_bishops(board)
-        score += self.sum_board(board)
+        score += self.checking(board)
 
         return score
 
     def opening_move(self, board: chess.Board):
         score = 0
         if self.opening_reader.get(board) is not None:
+            print("Opening!")
             score = 5 + randrange(-1, 1)
 
         if board.turn == chess.BLACK:
@@ -66,7 +67,10 @@ class Model:
             blackAttacked -= len(board.attackers(chess.BLACK, square))
             total_black_score -= (-1 * (self.maps.queen_table[square] // 22))
 
-        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
+        blackAttacked *= 4
+        whiteAttacked *= 4
+
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score]) * 9
 
     def score_king(self, board: chess.Board):
 
@@ -75,17 +79,22 @@ class Model:
 
         total_black_score = -1 * self.maps.king_table[black_king] // 10
         total_white_score = self.maps.king_table[white_king] // 10
-        
-        # if len(board.piece_map()) < 8:
-        #     total_white_score *= -1
-        #     total_black_score *= -1
+
         if chess.square_rank(black_king) == 7 and len(board.piece_map()) > 8:
             total_black_score -= 4
 
         if chess.square_rank(white_king) == 0 and len(board.piece_map()) > 8:
             total_white_score += 4
 
-        return sum([total_white_score, total_black_score])
+        # Aggressive king when the board starts to simplify
+        if len(board.piece_map()) < 10:
+            total_white_score *= -1
+            total_black_score *= -1
+
+        whiteAttacked = 5 * len(board.attackers(chess.BLACK, white_king))
+        blackAttacked = -5 * len(board.attackers(chess.BLACK, black_king))
+
+        return sum([total_white_score, total_black_score, whiteAttacked, blackAttacked])
 
     def score_knights(self, board: chess.Board):
         whiteAttacks = 0
@@ -100,14 +109,24 @@ class Model:
         for square in white_knights:
             whiteAttacks += len(board.attacks(square))
             whiteAttacked += len(board.attackers(chess.BLACK, square))
-            total_white_score += self.maps.knight_table[square] // 17
+            total_white_score += self.maps.knight_table[square] // 20
+
+            if chess.square_rank(square) == 0:
+                total_white_score -= 1
 
         for square in black_knights:
             blackAttacks -= len(board.attacks(square))
             blackAttacked -= len(board.attackers(chess.BLACK, square))
-            total_black_score -= (-1 * (self.maps.knight_table[square] // 17))
+            total_black_score -= (-1 * (self.maps.knight_table[square] // 20))
 
-        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
+            if chess.square_rank(square) == 0:
+                total_black_score += 1
+
+        blackAttacks *= .4
+        whiteAttacks *= .4
+
+        return sum(
+            [whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score]) * 3.2
 
     def score_rooks(self, board: chess.Board):
         whiteAttacks = 0
@@ -129,7 +148,7 @@ class Model:
             blackAttacked -= len(board.attackers(chess.BLACK, square))
             total_black_score -= (-1 * (self.maps.rook_table[square] // 20))
 
-        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score]) * 5
 
     def score_bishops(self, board: chess.Board):
         whiteAttacks = 0
@@ -141,17 +160,29 @@ class Model:
 
         white_bishops = board.pieces(chess.BISHOP, chess.WHITE)
         black_bishops = board.pieces(chess.BISHOP, chess.BLACK)
+
         for square in white_bishops:
             whiteAttacks += len(board.attacks(square))
             whiteAttacked += len(board.attackers(chess.BLACK, square))
             total_white_score += self.maps.bishop_table[square] // 18
 
+            # Penalty for not developing
+            if chess.square_rank(square) == 0:
+                total_white_score -= 1
+
         for square in black_bishops:
             blackAttacks -= len(board.attacks(square))
             blackAttacked -= len(board.attackers(chess.BLACK, square))
             total_black_score -= (-1 * (self.maps.bishop_table[square] // 18))
+            # Penalty for not developing
+            if chess.square_rank(square) == 7:
+                total_black_score += 1
 
-        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
+        blackAttacks *= .4
+        whiteAttacks *= .4
+
+        return sum(
+            [whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score]) * 3.3
 
     def score_pawns(self, board: chess.Board):
         whiteAttacks = 0
@@ -166,16 +197,16 @@ class Model:
         for square in white_pawns:
             whiteAttacks += len(board.attacks(square))
             whiteAttacked -= len(board.attackers(chess.BLACK, square))
-            total_white_score += self.maps.pawn_table[square] // 18
+            total_white_score += self.maps.pawn_table[square] // 20
 
         for square in black_pawns:
             blackAttacks -= len(board.attacks(square))
             blackAttacked += len(board.attackers(chess.BLACK, square))
-            total_black_score -= (-1 * (self.maps.pawn_table[square] // 18))
+            total_black_score -= (-1 * (self.maps.pawn_table[square] // 20))
 
-        # We want attacks to be scarier than attacked for pawns
-        blackAttacked *= .5
-        whiteAttacked *= .5
+        if len(board.piece_map()) < 15:
+            total_black_score *= 2
+            total_white_score *= 2
 
         return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
 
@@ -190,24 +221,32 @@ class Model:
         prev_move = board.pop()
 
         if board.is_castling(prev_move):
-            score = 6
+            score = 7
 
         if board.turn == chess.BLACK:
             score *= -1
 
         board.push(prev_move)
+
         return score
+
+    def checking(self, board: chess.Board):
+        num_attackers = 0
+        color = board.turn
+
+        if board.is_check():
+            attacked_king = board.pieces(chess.KING, color).pop()
+            num_attackers += len(board.attackers(not color, attacked_king))
+
+        if color == chess.WHITE:
+            num_attackers *= -1
+
+        # More attackers on king the better
+        return num_attackers * 2
 
     #
     def sum_board(self, board):
         score = 0
-
-        # score += 9 * (len(board.pieces(chess.QUEEN, chess.WHITE)) - len(board.pieces(chess.QUEEN, chess.BLACK)))
-        # score += 3.3 * (len(board.pieces(chess.BISHOP, chess.WHITE)) - len(board.pieces(chess.BISHOP, chess.BLACK)))
-        # score += 3.2 * (len(board.pieces(chess.KNIGHT, chess.WHITE)) - len(board.pieces(chess.KNIGHT, chess.BLACK)))
-        # score += 5 * (len(board.pieces(chess.ROOK, chess.WHITE)) - len(board.pieces(chess.ROOK, chess.BLACK)))
-        # score += (len(board.pieces(chess.PAWN, chess.WHITE)) - len(board.pieces(chess.PAWN, chess.BLACK)))
-
         score /= 10
 
         return score

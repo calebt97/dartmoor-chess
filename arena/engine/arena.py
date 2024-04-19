@@ -35,13 +35,14 @@ blackWins = 0
 whiteWins = 0
 draws = 0
 total_games = 0
-opening_fens = open("openings/fen_list", "r")
+opening_fens = open("openings/opening_fen_list.txt", "r")
 openings = opening_fens.readlines()
 random.shuffle(openings)
 
-while total_games < 10:
+while total_games < 21:
     total_games += 1
     state.initial_fen(openings[total_games])
+    # state.initial_random_moves(2)
 
     while run:
         state.drawGroup()
