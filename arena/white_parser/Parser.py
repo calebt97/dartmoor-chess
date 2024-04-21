@@ -1,3 +1,5 @@
+from random import randrange
+
 import chess
 
 from white_model import Model
@@ -18,7 +20,7 @@ class Parser:
         best_move_value = -1500.0
         best_move: chess.Move = None
         possible_moves = board.legal_moves
-
+        #
         # 100 equals checkmate
         for potential in possible_moves:
 
@@ -31,5 +33,7 @@ class Parser:
         if best_move is not None:
             print("white ideal move " + str(best_move))
             print("white ideal eval value " + str(best_move_value))
+        # moves = list(board.legal_moves)
+        # idx = randrange(len(moves))
         return best_move
 

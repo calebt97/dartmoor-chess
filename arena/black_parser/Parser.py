@@ -2,15 +2,30 @@ from random import randrange
 
 import chess
 
-from black_model import Model, MoveModel
+from black_model import BoardModel, MoveModel
 
+
+# TODO: Goals for .0.4:
+# TODO: Swarming on checkmate, not just following with queen
+# TODO: More rook activity
+# TODO: cut down eval time if possible, would love to bump depth
+# TODO: Attack passed pawns earlier
+# TODO: Keep pawns in front of king
+# TODO: Connected pawns bonus
+# TODO: Bishop pair bonus
+# TODO: Penalize being pinned
+# TODO: Prioritize Queen safety more
+# TODO: Once there are 5 pieces left, use that closing library and expand depth if necessary
+# TODO: Differentiate between opening, ending and middle games
+# TODO: Why does this even allow a checkmate in one against it? Shouldn't a single move bot never even get close enough?
 
 class Parser:
 
     def __init__(self):
-        self.board_model = Model.Model()
+        self.board_model = BoardModel.BoardModel()
         self.move_model = MoveModel.MoveModel()
-        self.max_depth = 2
+        self.starting_depth = 2
+        self.current_depth = self.starting_depth
         self.test_list = None
         board = chess.Board()
         self.previous_evals = {board.fen(): 0.0}
@@ -18,7 +33,16 @@ class Parser:
     def get_bot_name(self):
         return "hk-alpha.0.3"
 
+    def __set_depth(self, board: chess.Board):
+        # Depth of search will increase as game progresses, less value in deep searching early in game
+        if len(board.piece_map()) < 8:
+            self.current_depth = self.starting_depth + 1
+        else:
+            self.current_depth = self.starting_depth
+
+
     def find_move(self, board: chess.Board):
+        self.__set_depth(board)
 
         self.move_model.loadBoard(board)
 
@@ -67,15 +91,15 @@ class Parser:
                 alpha, beta):
 
         MAX, MIN = 1000, -1000
-        white_check_mate, black_checkmate = 1000, -1000
-
-        if board.is_checkmate() and board.turn == chess.WHITE:
-            # Bias for checkmates that are fewer turns away
-            return white_check_mate - (depth * 2)
+        white_checkmate, black_checkmate = 1000, -1000
 
         if board.is_checkmate() and board.turn == chess.BLACK:
             # Bias for checkmates that are fewer turns away
-            return white_check_mate + (depth * 2)
+            return white_checkmate - (depth * 2)
+
+        if board.is_checkmate() and board.turn == chess.WHITE:
+            # Bias for checkmates that are fewer turns away
+            return black_checkmate + (depth * 2)
 
         if board.is_fivefold_repetition():
             return 0
@@ -84,7 +108,7 @@ class Parser:
 
         # Terminating condition. i.e
         # leaf node is reached
-        if depth == self.max_depth:
+        if depth == self.current_depth:
 
             if self.previous_evals.get(board.fen()) is not None:
                 return self.previous_evals[board.fen()]
