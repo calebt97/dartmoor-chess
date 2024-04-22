@@ -17,7 +17,7 @@ class BoardModel:
             "k": 0
         }
         self.count = 0
-        self.opening_reader = chess.polyglot.open_reader("openings/human.bin")
+        self.opening_reader = chess.polyglot.open_reader("openings/baron30.bin")
         self.maps = value_maps.value_maps()
 
     def eval_board(self, board: chess.Board):
@@ -141,16 +141,21 @@ class BoardModel:
             whiteAttacks += len(board.attacks(square))
             whiteAttacked += len(board.attackers(chess.BLACK, square))
             total_white_score += self.maps.rook_table[square] // 16
+            if chess.square_rank(square) == 6:
+                total_white_score += 7
 
         for square in black_rooks:
             blackAttacks -= len(board.attacks(square))
             blackAttacked -= len(board.attackers(chess.BLACK, square))
             total_black_score -= (-1 * (self.maps.rook_table[square] // 16))
 
+            if chess.square_rank(square) == 1:
+                total_white_score -= 7
+
         whiteAttacks *= 1.5
         blackAttacks *= 1.5
 
-        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score])
+        return sum([whiteAttacked, whiteAttacks, blackAttacked, blackAttacks, total_white_score, total_black_score]) * 4
 
     def score_bishops(self, board: chess.Board):
         whiteAttacks = 0
@@ -162,6 +167,12 @@ class BoardModel:
 
         white_bishops = board.pieces(chess.BISHOP, chess.WHITE)
         black_bishops = board.pieces(chess.BISHOP, chess.BLACK)
+
+        if len(white_bishops) == 2:
+            total_white_score += 5
+
+        if len(black_bishops) == 2:
+            total_black_score -= 5
 
         for square in white_bishops:
             whiteAttacks += len(board.attacks(square))
@@ -211,12 +222,12 @@ class BoardModel:
             # +2 if directly in front of king, +1 in front on other rank
             if chess.square_file(square) == chess.square_file(white_king_square) and chess.square_rank(
                     white_king_square) + 1 == chess.square_rank(square):
-                total_white_score += 2
+                total_white_score += 5
 
             elif (chess.square_file(square) == chess.square_file(white_king_square) + 1 or chess.square_file(
                     square) == chess.square_file(white_king_square) - 1) and chess.square_rank(
                 white_king_square) + 1 == chess.square_rank(square):
-                total_white_score += 1
+                total_white_score += 3
 
         for square in black_pawns:
             blackAttacks -= len(board.attacks(square))
@@ -232,12 +243,12 @@ class BoardModel:
             # If pawns are 1 ahead of king on same file, plus 2. If they're adjacent and up 1, then plus 1
             if chess.square_file(square) == chess.square_file(black_king_square) and chess.square_rank(
                     black_king_square) - 1 == chess.square_rank(square):
-                total_black_score -= 3
+                total_black_score -= 5
 
             elif (chess.square_file(square) == chess.square_file(white_king_square) + 1 or chess.square_file(
                     square) == chess.square_file(white_king_square) - 1) and chess.square_rank(
                     black_king_square) - 1 == chess.square_rank(square):
-                total_black_score -= 2
+                total_black_score -= 3
 
         if len(board.piece_map()) < 15:
             total_black_score *= 1.5
@@ -265,8 +276,6 @@ class BoardModel:
 
         return score
 
-    def check_bank_rank(self, board: chess.Board):
-        
 
     def checking(self, board: chess.Board):
         num_attackers = 0

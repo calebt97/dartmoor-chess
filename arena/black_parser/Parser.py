@@ -12,7 +12,6 @@ from black_model import BoardModel, MoveModel
 # TODO: Attack passed pawns earlier
 # TODO: Keep pawns in front of king
 # TODO: Connected pawns bonus
-# TODO: Bishop pair bonus
 # TODO: Penalize being pinned
 # TODO: Prioritize Queen safety more
 # TODO: Once there are 5 pieces left, use that closing library and expand depth if necessary
@@ -35,7 +34,7 @@ class Parser:
 
     def __set_depth(self, board: chess.Board):
         # Depth of search will increase as game progresses, less value in deep searching early in game
-        if len(board.piece_map()) < 8:
+        if len(board.piece_map()) < 12:
             self.current_depth = self.starting_depth + 1
         else:
             self.current_depth = self.starting_depth
@@ -48,6 +47,11 @@ class Parser:
 
         moves = self.get_ordered_list_of_moves(board)
         self.test_list = moves
+
+        if len(moves) > 20:
+            top_half = moves[:len(moves) // 2]
+            return self.get_best_move(board, top_half)
+
         return self.get_best_move(board, moves)
 
     def get_ordered_list_of_moves(self, board: chess.Board):
@@ -129,6 +133,7 @@ class Parser:
 
                 val = self.minimax(depth + 1, board_copy,
                                    False, alpha, beta)
+
 
                 best = max(best, val)
                 alpha = max(alpha, best)
