@@ -5,7 +5,7 @@ from dartmoor_model import Model, MoveModel
 class Parser:
 
     def __init__(self):
-        self.board_model = Model.Model()
+        self.board_model = Model.BoardModel()
         self.move_model = MoveModel.MoveModel()
         self.max_depth = 2
         self.test_list = None

@@ -41,7 +41,8 @@ random.shuffle(openings)
 
 while total_games < 31:
     total_games += 1
-    state.initial_fen(openings[total_games])
+    # state.initial_fen(openings[total_games])
+    state.initial_random_moves(2)
 
     while run:
         state.drawGroup()
