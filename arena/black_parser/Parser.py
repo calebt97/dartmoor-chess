@@ -71,11 +71,11 @@ class Parser:
 
         if board.is_checkmate() and board.turn == chess.WHITE:
             # Bias for checkmates that are fewer turns away
-            return white_check_mate - (depth * 2)
+            return black_checkmate + (depth * 2)
 
         if board.is_checkmate() and board.turn == chess.BLACK:
             # Bias for checkmates that are fewer turns away
-            return white_check_mate + (depth * 2)
+            return white_check_mate - (depth * 2)
 
         if board.is_fivefold_repetition():
             return 0
@@ -100,10 +100,18 @@ class Parser:
             best = MIN
 
             for move in legal_moves:
+                val = 0
                 board_copy = board.copy()
+
+                q_search = self.needs_q_search(move, board_copy)
+
                 board_copy.push(move)
 
-                val = self.minimax(depth + 1, board_copy,
+                if q_search:
+                    val = self.qSearch(depth + 1, board_copy, False, alpha, beta)
+
+                else:
+                    val = self.minimax(depth + 1, board_copy,
                                    False, alpha, beta)
 
                 best = max(best, val)
@@ -119,11 +127,19 @@ class Parser:
             best = MAX
 
             for move in legal_moves:
+                val = 0
                 board_copy = board.copy()
+
+                q_search = self.needs_q_search(move, board_copy)
+
                 board_copy.push(move)
 
-                val = self.minimax(depth + 1, board,
-                                   True, alpha, beta)
+                if q_search:
+                    val = self.qSearch(depth + 1, board_copy, True, alpha, beta)
+
+                else:
+                    val = self.minimax(depth + 1, board_copy,
+                                       True, alpha, beta)
                 best = min(best, val)
                 beta = min(beta, best)
 
@@ -132,3 +148,14 @@ class Parser:
                     break
 
             return best
+
+    def qSearch(self, depth, board: chess.Board, maximizing_player,
+                    alpha, beta):
+
+        return 0
+
+    def needs_q_search(self, move: chess.Move, board: chess.Board):
+        if board.is_capture(move) or board.is_castling(move) or board.gives_check(move) or move.promotion:
+            return True
+
+        return False
