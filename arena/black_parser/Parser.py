@@ -10,8 +10,10 @@ class Parser:
     def __init__(self):
         self.board_model = Model.Model()
         self.move_model = MoveModel.MoveModel()
-        self.max_depth = 2
+        self.standard_depth = 2
+        self.max_depth = 4
         self.test_list = None
+        self.deep_counter = 0
         board = chess.Board()
         self.previous_evals = {board.fen(): 0.0}
 
@@ -61,6 +63,7 @@ class Parser:
 
         print("best move " + str(best_move))
         print("best score " + str(best_value))
+        print(str(self.deep_counter))
         return best_move
 
     def minimax(self, depth, board: chess.Board, maximizing_player,
@@ -75,6 +78,96 @@ class Parser:
 
         if board.is_checkmate() and board.turn == chess.BLACK:
             # Bias for checkmates that are fewer turns away
+            return white_check_mate - (depth * 2)
+
+        if board.is_fivefold_repetition():
+            return 0
+
+        legal_moves = board.legal_moves
+
+        # Terminating condition. i.e
+        # leaf node is reached
+        if depth >= self.standard_depth:
+
+            if self.previous_evals.get(board.fen()) is not None:
+                return self.previous_evals[board.fen()]
+
+            eval = self.board_model.eval_board(board)
+
+            self.previous_evals[board.fen()] = eval
+
+            return eval
+
+        if maximizing_player:
+
+            best = MIN
+
+            for move in legal_moves:
+                val = 0
+                board_copy = board.copy()
+
+                q_search = self.needs_q_search(move, board_copy)
+
+                board_copy.push(move)
+
+                if q_search:
+                    val = self.qSearch(depth + 1, board_copy, False, alpha, beta)
+
+                else:
+                    val = self.minimax(depth + 1, board_copy,
+                                   False, alpha, beta)
+
+                best = max(best, val)
+                alpha = max(alpha, best)
+
+                # Alpha Beta Pruning
+                if beta <= alpha:
+                    break
+
+            return best
+
+        else:
+            best = MAX
+
+            for move in legal_moves:
+                val = 0
+                board_copy = board.copy()
+
+                q_search = self.needs_q_search(move, board_copy)
+
+                board_copy.push(move)
+
+                if q_search:
+                    val = self.qSearch(depth + 1, board_copy, True, alpha, beta)
+
+                else:
+                    val = self.minimax(depth + 1, board_copy,
+                                       True, alpha, beta)
+                best = min(best, val)
+                beta = min(beta, best)
+
+                # Alpha Beta Pruning
+                if beta <= alpha:
+                    break
+
+            return best
+
+    def qSearch(self, depth, board: chess.Board, maximizing_player,
+                    alpha, beta):
+        if depth >= 3:
+            self.deep_counter += 1
+
+        MAX, MIN = 1000, -1000
+        white_check_mate, black_checkmate = 1000, -1000
+
+        if board.is_checkmate() and board.turn == chess.WHITE:
+            # Bias for checkmates that are fewer turns away
+            print("found black checkmate!")
+            return black_checkmate + (depth * 2)
+
+        if board.is_checkmate() and board.turn == chess.BLACK:
+            # Bias for checkmates that are fewer turns away
+            print("found white checkmate!")
             return white_check_mate - (depth * 2)
 
         if board.is_fivefold_repetition():
@@ -149,10 +242,6 @@ class Parser:
 
             return best
 
-    def qSearch(self, depth, board: chess.Board, maximizing_player,
-                    alpha, beta):
-
-        return 0
 
     def needs_q_search(self, move: chess.Move, board: chess.Board):
         if board.is_capture(move) or board.is_castling(move) or board.gives_check(move) or move.promotion:
