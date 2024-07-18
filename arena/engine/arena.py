@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 
 import pygame, chess
+import datetime
 
 from State import State
 
@@ -30,7 +31,7 @@ state = State(chess.Board(), pygame.sprite.Group(), board_rect, window, gameBoar
 
 run = True
 counter = 0
-color = True
+color = chess.WHITE
 blackWins = 0
 whiteWins = 0
 draws = 0
@@ -39,7 +40,7 @@ opening_fens = open("openings/opening_fen_list.txt", "r")
 openings = opening_fens.readlines()
 random.shuffle(openings)
 
-while total_games < 31:
+while total_games < 30:
     total_games += 1
     state.initial_fen(openings[total_games])
 
@@ -57,25 +58,27 @@ while total_games < 31:
             print("\ndraws: " + str(draws))
             break
 
-        winner = state.play_game(color)
+        state.play_game(color)
+        time.sleep(1)
         state.drawGroup()
         pygame.display.flip()
         color = not color
-        if winner == chess.WHITE:
-            print("white won")
-            whiteWins += 1
-            print("\n------------\nwhite wins: " + str(whiteWins))
-            print("\nblack wins: " + str(blackWins))
-            print("\ndraws: " + str(draws))
-            break
+        if state.board.outcome():
+            if state.board.outcome().winner == chess.WHITE:
+                print("white won")
+                whiteWins += 1
+                print("\n------------\nwhite wins: " + str(whiteWins))
+                print("\nblack wins: " + str(blackWins))
+                print("\ndraws: " + str(draws))
+                break
 
-        if winner == chess.BLACK:
-            print("black won")
-            blackWins += 1
-            print("\n------------\nwhite wins: " + str(whiteWins))
-            print("\nblack wins: " + str(blackWins))
-            print("\ndraws: " + str(draws))
-            break
+            if state.board.outcome().winner == chess.BLACK:
+                print("black won")
+                blackWins += 1
+                print("\n------------\nwhite wins: " + str(whiteWins))
+                print("\nblack wins: " + str(blackWins))
+                print("\ndraws: " + str(draws))
+                break
 
 
     state.reloadState()
@@ -88,6 +91,9 @@ report = open(path, "a")
 report.write("\n------------\nwhite wins: " + str(whiteWins))
 report.write("\nblack wins: " + str(blackWins))
 report.write("\ndraws: " + str(draws))
+report.write("\ntimestamp: " + str(datetime.datetime.now()))
+
+
 report.close()
 
 pygame.quit()

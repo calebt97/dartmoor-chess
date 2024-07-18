@@ -23,13 +23,14 @@ class Parser:
         self.move_model.loadBoard(board)
 
         moves = self.get_ordered_list_of_moves(board)
-        self.test_list = moves
         return self.get_best_move(board, moves)
 
     def get_ordered_list_of_moves(self, board: chess.Board):
         possible_moves = board.legal_moves
         sorted_moves = sorted(possible_moves, key=lambda move: self.move_model.evaluateMove(move))
-        sorted_moves.reverse()
+
+        if board.turn == chess.BLACK:
+            sorted_moves.reverse()
 
         return sorted_moves
 
@@ -59,8 +60,8 @@ class Parser:
                 # print("best move update "+str(move))
                 # print("best score update "+str(best_value))
 
-        print("best move " + str(best_move))
-        print("best score " + str(best_value))
+        print("black best move " + str(best_move))
+        print("black best score " + str(best_value))
         return best_move
 
     def minimax(self, depth, board: chess.Board, maximizing_player,

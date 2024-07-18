@@ -15,3 +15,20 @@ draws: 4
 white wins: 2
 black wins: 4
 draws: 4
+------------
+white wins: 8
+black wins: 0
+draws: 2
+------------
+white wins: 2
+black wins: 6
+draws: 2
+------------
+white wins: 7
+black wins: 11
+draws: 12
+------------
+white wins: 4
+black wins: 21
+draws: 5
+timestamp: 2024-07-17 20:50:37.262302

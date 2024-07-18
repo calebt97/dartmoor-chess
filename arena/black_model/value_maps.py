@@ -1,7 +1,7 @@
 
 class value_maps:
     def __init__(self):
-        self.pawn_table = [
+        self.white_pawn_table = [
             0, 0, 0, 0, 0, 0, 0, 0,
             98, 134, 61, 95, 68, 126, 34, -11,
             -6, 7, 26, 31, 65, 56, 25, -20,
@@ -12,7 +12,7 @@ class value_maps:
             0, 0, 0, 0, 0, 0, 0, 0,
         ]
 
-        self.knight_table = [
+        self.white_knight_table = [
             -167, -89, -34, -49, 61, -97, -15, -107,
             -73, -41, 32, 36, 23, 32, 7, -17,
             -47, 30, 37, 65, 84, 129, 73, 44,
@@ -23,7 +23,7 @@ class value_maps:
             -105, -21, -58, -33, -17, -28, -19, -23,
         ]
 
-        self.bishop_table = [
+        self.white_bishop_table = [
             -29, 4, -82, -37, -25, -42, 7, -8,
             -26, 16, -18, -13, 30, 59, 18, -47,
             -16, 37, 43, 40, 35, 50, 37, -2,
@@ -34,7 +34,7 @@ class value_maps:
             -33, -3, -14, -21, -13, -12, -39, -21,
         ]
 
-        self.rook_table = [
+        self.white_rook_table = [
             13, 10, 18, 15, 12, 12, 8, 5,
             11, 13, 13, 11, -3, 3, 8, 3,
             7, 7, 7, 5, 4, -3, -5, -3,
@@ -45,7 +45,7 @@ class value_maps:
             -9, 2, 3, -1, -5, -13, 4, -20,
         ]
 
-        self.queen_table = [
+        self.white_queen_table = [
             -28, 0, 29, 12, 59, 44, 43, 45,
             -24, -39, -5, 1, -16, 57, 28, 54,
             -13, -17, 7, 8, 29, 56, 47, 57,
@@ -56,7 +56,7 @@ class value_maps:
             -1, -18, -9, 10, -15, -25, -31, -50,
         ]
 
-        self.king_table = [
+        self.white_king_table = [
             -65, 23, 16, -15, -56, -34, 2, 13,
             29, -1, -20, -7, -8, -4, -38, -29,
             -9, 24, 2, -16, -20, 6, 22, -22,
@@ -66,3 +66,16 @@ class value_maps:
             1, 7, -8, -64, -43, -16, 9, 8,
             -15, 36, 12, -54, 8, -28, 24, 14,
         ]
+
+        self.black_king_table = self.white_king_table.copy()
+        self.black_queen_table = self.white_queen_table.copy()
+        self.black_rook_table = self.white_rook_table.copy()
+        self.black_bishop_table = self.white_bishop_table.copy()
+        self.black_knight_table = self.white_knight_table.copy()
+        self.black_pawn_table = self.white_pawn_table.copy()
+        self.black_king_table.reverse()
+        self.black_queen_table.reverse()
+        self.black_rook_table.reverse()
+        self.black_bishop_table.reverse()
+        self.black_knight_table.reverse()
+        self.black_pawn_table.reverse()

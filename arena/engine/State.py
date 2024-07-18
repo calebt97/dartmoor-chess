@@ -28,27 +28,23 @@ class State:
     def play_game(self, color):
         self.window.blit(self.gameBoardVis, (0, 0))
 
-        time.sleep(.5)
+        # time.sleep(.75)
+        move = ""
         if color == chess.WHITE:
             move = self.white_parser.find_move(self.board)
-
-            self.board.push(move)
-
-            self.drawGroup()
-            self.window.blit(self.gameBoardVis, (0, 0))
-            if self.board.is_checkmate():
-                return chess.WHITE
 
         if color == chess.BLACK:
             move = self.black_parser.find_move(self.board)
 
-            self.board.push(move)
+        self.board.push(move)
 
-            self.drawGroup()
-            self.window.blit(self.gameBoardVis, (0, 0))
+        self.drawGroup()
+        self.window.blit(self.gameBoardVis, (0, 0))
 
-            if self.board.is_checkmate():
-                return chess.BLACK
+        if self.board.is_checkmate():
+            print("Checkmate!!!")
+            print(str(color))
+            return color
 
     def drawGroup(self):
 
