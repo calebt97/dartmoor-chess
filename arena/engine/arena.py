@@ -37,14 +37,19 @@ whiteWins = 0
 draws = 0
 total_games = 0
 opening_fens = open("openings/opening_fen_list.txt", "r")
+black_times = []
+white_times = []
+white_avgs = []
+black_avgs = []
 openings = opening_fens.readlines()
 random.shuffle(openings)
 
-while total_games < 30:
+while total_games < 10:
     total_games += 1
     state.initial_fen(openings[total_games])
 
     while run:
+        start = time.time()
         state.drawGroup()
         pygame.display.flip()
 
@@ -59,6 +64,11 @@ while total_games < 30:
             break
 
         state.play_game(color)
+        if color == chess.BLACK:
+            black_times.append(time.time() - start)
+        else:
+            white_times.append(time.time() - start)
+
         time.sleep(1)
         state.drawGroup()
         pygame.display.flip()
@@ -70,6 +80,16 @@ while total_games < 30:
                 print("\n------------\nwhite wins: " + str(whiteWins))
                 print("\nblack wins: " + str(blackWins))
                 print("\ndraws: " + str(draws))
+                black_avg = sum(black_times) / len(black_times)
+                white_avg = sum(white_times) / len(white_times)
+                print("black avg: " + str(black_avg))
+                print("white avg: " + str(white_avg))
+
+                black_avgs.append(black_avg)
+                white_avgs.append(white_avg)
+                black_times.clear()
+                white_times.clear()
+
                 break
 
             if state.board.outcome().winner == chess.BLACK:
@@ -78,6 +98,15 @@ while total_games < 30:
                 print("\n------------\nwhite wins: " + str(whiteWins))
                 print("\nblack wins: " + str(blackWins))
                 print("\ndraws: " + str(draws))
+                black_avg = sum(black_times) / len(black_times)
+                white_avg = sum(white_times) / len(white_times)
+                print("black avg: " + str(black_avg))
+                print("white avg: " + str(white_avg))
+
+                black_avgs.append(black_avg)
+                white_avgs.append(white_avg)
+                black_times.clear()
+                white_times.clear()
                 break
 
 
@@ -92,6 +121,10 @@ report.write("\n------------\nwhite wins: " + str(whiteWins))
 report.write("\nblack wins: " + str(blackWins))
 report.write("\ndraws: " + str(draws))
 report.write("\ntimestamp: " + str(datetime.datetime.now()))
+total_black_avg = sum(black_avgs) / len(black_avgs)
+report.write("\nblack avg: " + str(total_black_avg))
+total_white_avg = sum(white_avgs) / len(white_avgs)
+report.write("\nwhite avg: " + str(total_white_avg))
 
 
 report.close()

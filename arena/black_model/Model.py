@@ -91,8 +91,8 @@ class Model:
         #     total_white_score *= -1
         #     total_black_score *= -1
 
-        whiteAttacked = 5 * len(board.attackers(chess.BLACK, white_king))
-        blackAttacked = -5 * len(board.attackers(chess.WHITE, black_king))
+        whiteAttacked = 8 * len(board.attackers(chess.BLACK, white_king))
+        blackAttacked = -8 * len(board.attackers(chess.WHITE, black_king))
 
         return sum([total_white_score, total_black_score, whiteAttacked, blackAttacked])
 

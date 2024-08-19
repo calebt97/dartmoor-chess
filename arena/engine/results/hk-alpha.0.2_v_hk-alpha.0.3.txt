@@ -32,3 +32,17 @@ white wins: 4
 black wins: 21
 draws: 5
 timestamp: 2024-07-17 20:50:37.262302
+------------
+white wins: 0
+black wins: 7
+draws: 3
+timestamp: 2024-07-18 12:19:35.587712
+black avg: 109.78237832916622
+white avg: 0.020278163281588508
+------------
+white wins: 1
+black wins: 9
+draws: 0
+timestamp: 2024-07-18 12:45:16.930205
+black avg: 11.717647586922082
+white avg: 0.022066597808047532
